@@ -1,0 +1,970 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Beautiful Library</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Georgia", serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 40px 20px;
+        overflow-x: hidden;
+      }
+
+      .library-header {
+        text-align: center;
+        color: white;
+        margin-bottom: 30px;
+      }
+
+      .library-header h1 {
+        font-size: 3.5em;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        margin-bottom: 10px;
+      }
+
+      .library-header p {
+        font-size: 1.2em;
+        opacity: 0.9;
+      }
+
+      .add-book-btn {
+        background: white;
+        color: #667eea;
+        border: none;
+        padding: 15px 30px;
+        font-size: 1.1em;
+        border-radius: 50px;
+        cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin: 20px auto;
+        display: block;
+        font-weight: bold;
+      }
+
+      .add-book-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      .bookshelf {
+        display: flex;
+        gap: 60px;
+        flex-wrap: wrap;
+        justify-content: center;
+        perspective: 1500px;
+        margin-bottom: 50px;
+      }
+
+      .book-container {
+        position: relative;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+      }
+
+      .book-container:hover {
+        transform: translateY(-10px);
+      }
+
+      .book {
+        width: 200px;
+        height: 280px;
+        position: relative;
+        transform-style: preserve-3d;
+      }
+
+      .book-cover {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(145deg, #f3f4f6, #e5e7eb);
+        border-radius: 0 8px 8px 0;
+        box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.3),
+          inset 2px 0 5px rgba(0, 0, 0, 0.1);
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .book-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          145deg,
+          rgba(220, 38, 38, 0.9),
+          rgba(153, 27, 27, 0.9)
+        );
+        border-radius: 0 8px 8px 0;
+        padding: 30px 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .book-spine {
+        position: absolute;
+        left: -20px;
+        width: 20px;
+        height: 100%;
+        background: linear-gradient(90deg, #1f2937, #374151);
+        border-radius: 8px 0 0 8px;
+        box-shadow: -3px 0 10px rgba(0, 0, 0, 0.3);
+      }
+
+      .book-title {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: white;
+        text-align: center;
+        margin-bottom: 10px;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .book-author {
+        font-size: 1em;
+        color: white;
+        text-align: center;
+        font-style: italic;
+        margin-top: auto;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+      }
+
+      .book-decoration {
+        width: 60px;
+        height: 60px;
+        margin: 20px auto;
+        border: 3px solid white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2em;
+      }
+
+      /* Reading Status Badge */
+      .status-badge {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.75em;
+        font-weight: bold;
+        z-index: 10;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .status-read {
+        background: #10b981;
+        color: white;
+      }
+
+      .status-reading {
+        background: #f59e0b;
+        color: white;
+      }
+
+      .status-to-read {
+        background: #6366f1;
+        color: white;
+      }
+
+      /* Status Selector */
+      .status-selector {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        z-index: 10;
+      }
+
+      .status-selector select {
+        padding: 5px 10px;
+        border-radius: 5px;
+        border: 2px solid white;
+        background: rgba(255, 255, 255, 0.9);
+        cursor: pointer;
+        font-size: 0.85em;
+        font-weight: bold;
+      }
+
+      /* Book Colors */
+      .book-container:nth-child(1) .book-overlay {
+        background: linear-gradient(
+          145deg,
+          rgba(220, 38, 38, 0.9),
+          rgba(153, 27, 27, 0.9)
+        );
+      }
+
+      .book-container:nth-child(2) .book-overlay {
+        background: linear-gradient(
+          145deg,
+          rgba(37, 99, 235, 0.9),
+          rgba(30, 64, 175, 0.9)
+        );
+      }
+
+      .book-container:nth-child(3) .book-overlay {
+        background: linear-gradient(
+          145deg,
+          rgba(5, 150, 105, 0.9),
+          rgba(4, 120, 87, 0.9)
+        );
+      }
+
+      /* Open Book Modal */
+      .book-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .book-modal.active {
+        display: flex;
+      }
+
+      .open-book {
+        position: relative;
+        width: 90%;
+        max-width: 1200px;
+        height: 80vh;
+        max-height: 700px;
+        display: flex;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        perspective: 2000px;
+      }
+
+      .book-page {
+        flex: 1;
+        padding: 50px;
+        overflow-y: auto;
+        position: relative;
+      }
+
+      .left-page {
+        background: linear-gradient(to right, #f8f8f0 0%, #fefce8 100%);
+        border-right: 2px solid #d4d4d4;
+        box-shadow: inset -10px 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .right-page {
+        background: linear-gradient(to left, #f8f8f0 0%, #fefce8 100%);
+        box-shadow: inset 10px 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .page-number {
+        position: absolute;
+        bottom: 20px;
+        font-size: 0.9em;
+        color: #666;
+      }
+
+      .left-page .page-number {
+        left: 50px;
+      }
+
+      .right-page .page-number {
+        right: 50px;
+      }
+
+      .page-content-modal h2 {
+        color: #1f2937;
+        margin-bottom: 20px;
+        font-size: 2em;
+        border-bottom: 3px solid #667eea;
+        padding-bottom: 10px;
+      }
+
+      .page-content-modal h3 {
+        color: #374151;
+        margin: 25px 0 15px 0;
+        font-size: 1.5em;
+      }
+
+      .page-content-modal p {
+        line-height: 1.8;
+        margin-bottom: 15px;
+        text-align: justify;
+        color: #1f2937;
+        font-size: 1.05em;
+      }
+
+      .close-book-btn {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 40px;
+        height: 40px;
+        background: #dc2626;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        font-size: 1.5em;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        transition: transform 0.3s ease, background 0.3s ease;
+        z-index: 10;
+      }
+
+      .close-book-btn:hover {
+        transform: scale(1.1);
+        background: #991b1b;
+      }
+
+      /* Add Book Form Modal */
+      .add-book-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 2000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .add-book-modal.active {
+        display: flex;
+      }
+
+      .add-book-form {
+        background: white;
+        padding: 40px;
+        border-radius: 20px;
+        width: 90%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      }
+
+      .add-book-form h2 {
+        color: #667eea;
+        margin-bottom: 30px;
+        text-align: center;
+        font-size: 2em;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #374151;
+        font-weight: bold;
+      }
+
+      .form-group input,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e5e7eb;
+        border-radius: 8px;
+        font-size: 1em;
+        font-family: "Georgia", serif;
+        transition: border-color 0.3s ease;
+      }
+
+      .form-group input:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .form-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .form-btn {
+        flex: 1;
+        padding: 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1em;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .add-btn {
+        background: #667eea;
+        color: white;
+      }
+
+      .cancel-btn {
+        background: #e5e7eb;
+        color: #374151;
+      }
+
+      .form-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .color-picker {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .color-option {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        border: 3px solid transparent;
+        transition: transform 0.3s ease, border-color 0.3s ease;
+      }
+
+      .color-option:hover {
+        transform: scale(1.1);
+      }
+
+      .color-option.selected {
+        border-color: #1f2937;
+        transform: scale(1.15);
+      }
+
+      /* Scrollbar */
+      .book-page::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      .book-page::-webkit-scrollbar-track {
+        background: #f1f5f9;
+      }
+
+      .book-page::-webkit-scrollbar-thumb {
+        background: #94a3b8;
+        border-radius: 4px;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .library-header h1 {
+          font-size: 2.5em;
+        }
+
+        .bookshelf {
+          gap: 40px;
+        }
+
+        .book {
+          width: 160px;
+          height: 240px;
+        }
+
+        .open-book {
+          flex-direction: column;
+          height: 90vh;
+        }
+
+        .book-page {
+          padding: 30px 20px;
+        }
+
+        .page-content-modal h2 {
+          font-size: 1.5em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="library-header">
+      <h1>📚 My Library</h1>
+      <p>Click on any book to read</p>
+    </div>
+
+    <button class="add-book-btn" onclick="openAddBookModal()">
+      ➕ Add New Book
+    </button>
+
+    <div class="bookshelf" id="bookshelf">
+      <!-- Book 1 -->
+      <div class="book-container" data-book-id="1">
+        <div class="status-badge status-to-read">To Read</div>
+        <div class="book" onclick="openBook(1)">
+          <div class="book-spine"></div>
+          <div class="book-cover">
+            <div class="book-overlay">
+              <div class="book-title">The Great Adventure</div>
+              <div class="book-decoration">🌟</div>
+              <div class="book-author">by Jane Smith</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-selector">
+          <select
+            onchange="changeStatus(this, 1)"
+            onclick="event.stopPropagation()"
+          >
+            <option value="to-read" selected>To Read</option>
+            <option value="reading">Reading</option>
+            <option value="read">Read</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Book 2 -->
+      <div class="book-container" data-book-id="2">
+        <div class="status-badge status-reading">Reading</div>
+        <div class="book" onclick="openBook(2)">
+          <div class="book-spine"></div>
+          <div class="book-cover">
+            <div class="book-overlay">
+              <div class="book-title">Ocean of Mysteries</div>
+              <div class="book-decoration">🌊</div>
+              <div class="book-author">by Robert Blue</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-selector">
+          <select
+            onchange="changeStatus(this, 2)"
+            onclick="event.stopPropagation()"
+          >
+            <option value="to-read">To Read</option>
+            <option value="reading" selected>Reading</option>
+            <option value="read">Read</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Book 3 -->
+      <div class="book-container" data-book-id="3">
+        <div class="status-badge status-read">Read</div>
+        <div class="book" onclick="openBook(3)">
+          <div class="book-spine"></div>
+          <div class="book-cover">
+            <div class="book-overlay">
+              <div class="book-title">Tales of Tomorrow</div>
+              <div class="book-decoration">🚀</div>
+              <div class="book-author">by Maria Future</div>
+            </div>
+          </div>
+        </div>
+        <div class="status-selector">
+          <select
+            onchange="changeStatus(this, 3)"
+            onclick="event.stopPropagation()"
+          >
+            <option value="to-read">To Read</option>
+            <option value="reading">Reading</option>
+            <option value="read" selected>Read</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Open Book Modal -->
+    <div class="book-modal" id="bookModal">
+      <button class="close-book-btn" onclick="closeBook()">✕</button>
+      <div class="open-book">
+        <div class="book-page left-page">
+          <div class="page-content-modal" id="leftPageContent"></div>
+          <div class="page-number">1</div>
+        </div>
+        <div class="book-page right-page">
+          <div class="page-content-modal" id="rightPageContent"></div>
+          <div class="page-number">2</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Book Modal -->
+    <div class="add-book-modal" id="addBookModal">
+      <div class="add-book-form">
+        <h2>📖 Add New Book</h2>
+        <form id="newBookForm" onsubmit="addNewBook(event)">
+          <div class="form-group">
+            <label>Book Title *</label>
+            <input
+              type="text"
+              id="bookTitle"
+              required
+              placeholder="Enter book title"
+            />
+          </div>
+          <div class="form-group">
+            <label>Author *</label>
+            <input
+              type="text"
+              id="bookAuthor"
+              required
+              placeholder="Enter author name"
+            />
+          </div>
+          <div class="form-group">
+            <label>Cover Image URL (optional)</label>
+            <input
+              type="url"
+              id="bookCoverUrl"
+              placeholder="https://example.com/image.jpg"
+            />
+          </div>
+          <div class="form-group">
+            <label>Icon/Emoji</label>
+            <input type="text" id="bookIcon" placeholder="📚" maxlength="2" />
+          </div>
+          <div class="form-group">
+            <label>Book Color</label>
+            <div class="color-picker">
+              <div
+                class="color-option selected"
+                data-color="linear-gradient(145deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.9))"
+                style="background: linear-gradient(145deg, #dc2626, #991b1b)"
+              ></div>
+              <div
+                class="color-option"
+                data-color="linear-gradient(145deg, rgba(37, 99, 235, 0.9), rgba(30, 64, 175, 0.9))"
+                style="background: linear-gradient(145deg, #2563eb, #1e40af)"
+              ></div>
+              <div
+                class="color-option"
+                data-color="linear-gradient(145deg, rgba(5, 150, 105, 0.9), rgba(4, 120, 87, 0.9))"
+                style="background: linear-gradient(145deg, #059669, #047857)"
+              ></div>
+              <div
+                class="color-option"
+                data-color="linear-gradient(145deg, rgba(168, 85, 247, 0.9), rgba(126, 34, 206, 0.9))"
+                style="background: linear-gradient(145deg, #a855f7, #7e22ce)"
+              ></div>
+              <div
+                class="color-option"
+                data-color="linear-gradient(145deg, rgba(236, 72, 153, 0.9), rgba(190, 24, 93, 0.9))"
+                style="background: linear-gradient(145deg, #ec4899, #be185d)"
+              ></div>
+              <div
+                class="color-option"
+                data-color="linear-gradient(145deg, rgba(234, 179, 8, 0.9), rgba(161, 98, 7, 0.9))"
+                style="background: linear-gradient(145deg, #eab308, #a16207)"
+              ></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Reading Status</label>
+            <select id="bookStatus">
+              <option value="to-read">To Read</option>
+              <option value="reading">Reading</option>
+              <option value="read">Read</option>
+            </select>
+          </div>
+          <div class="form-buttons">
+            <button
+              type="button"
+              class="form-btn cancel-btn"
+              onclick="closeAddBookModal()"
+            >
+              Cancel
+            </button>
+            <button type="submit" class="form-btn add-btn">Add Book</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <script>
+      // Book data
+      const booksData = {
+        1: {
+          title: "The Great Adventure",
+          author: "Jane Smith",
+          leftContent: `
+                    <h2>The Great Adventure</h2>
+                    <p><em>by Jane Smith</em></p>
+                    <h3>Chapter 1: The Beginning</h3>
+                    <p>In a world where dreams and reality intertwine, our story begins in a small village nestled between mountains.</p>
+                    <p>The protagonist, a young adventurer named Alex, had always dreamed of exploring the unknown territories beyond the peaks.</p>
+                    <p>One morning, as the sun cast golden rays across the valley, Alex discovered an ancient map hidden in the attic of an old library.</p>
+                    <p>The map showed mysterious lands filled with treasures, challenges, and secrets waiting to be unveiled.</p>
+                `,
+          rightContent: `
+                    <h3>Chapter 2: The Journey Begins</h3>
+                    <p>With courage in heart and the map in hand, Alex embarked on the greatest adventure of a lifetime.</p>
+                    <p>Through forests and rivers, deserts and caves, each step brought new discoveries and friendships.</p>
+                    <p>The first challenge came at the Bridge of Whispers, where ancient guardians tested the worthiness of all travelers.</p>
+                    <p>Alex learned that true adventure lies not in the destination, but in the courage to take the first step into the unknown.</p>
+                    <p>As night fell on the first day of travel, the stars seemed to shine brighter than ever before, as if celebrating the beginning of an epic tale.</p>
+                `,
+        },
+        2: {
+          title: "Ocean of Mysteries",
+          author: "Robert Blue",
+          leftContent: `
+                    <h2>Ocean of Mysteries</h2>
+                    <p><em>by Robert Blue</em></p>
+                    <h3>Chapter 1: Depths Unknown</h3>
+                    <p>The ocean has always held secrets beyond human comprehension. Deep beneath the waves, where sunlight barely reaches, lies a world of wonder.</p>
+                    <p>Marine biologist Dr. Sarah Chen dedicated her life to understanding these mysteries.</p>
+                    <p>Her latest expedition would take her to the Mariana Trench, the deepest part of the world's oceans.</p>
+                    <p>What she discovered there would change our understanding of life itself.</p>
+                `,
+          rightContent: `
+                    <h3>Chapter 2: The Discovery</h3>
+                    <p>At 10,000 meters below the surface, the research submarine's lights revealed something extraordinary.</p>
+                    <p>Ancient structures, impossibly preserved, suggested an intelligence that predated humanity.</p>
+                    <p>The walls were covered in bioluminescent patterns that seemed to pulse with a rhythm, almost like breathing.</p>
+                    <p>Dr. Chen realized that the ocean floor held not just geological wonders, but evidence of a civilization lost to time.</p>
+                    <p>As the submarine's cameras captured every detail, she knew that this discovery would rewrite history books around the world.</p>
+                `,
+        },
+        3: {
+          title: "Tales of Tomorrow",
+          author: "Maria Future",
+          leftContent: `
+                    <h2>Tales of Tomorrow</h2>
+                    <p><em>by Maria Future</em></p>
+                    <h3>Chapter 1: The New Dawn</h3>
+                    <p>In the year 2150, humanity had finally reached the stars. Colonies on Mars and Europa thrived with thousands of inhabitants.</p>
+                    <p>Technology had advanced beyond our wildest dreams, yet the human spirit remained unchanged.</p>
+                    <p>This is a collection of stories from those who dared to dream of tomorrow.</p>
+                    <p>Each tale explores what it means to be human in an age of artificial intelligence and interstellar travel.</p>
+                `,
+          rightContent: `
+                    <h3>Chapter 2: First Contact</h3>
+                    <p>When the signal came from Proxima Centauri, it changed everything we thought we knew about our place in the universe.</p>
+                    <p>A team of scientists, diplomats, and explorers prepared for humanity's first meeting with alien intelligence.</p>
+                    <p>The journey would take five years, even with the new quantum drives that bent space-time itself.</p>
+                    <p>Among the crew was a young linguist named Aria, whose gift for understanding patterns would prove crucial to bridging two civilizations.</p>
+                    <p>As the ship accelerated away from Earth, everyone aboard knew they were leaving not just a planet, but an entire era of human history behind.</p>
+                `,
+        },
+      };
+
+      let nextBookId = 4;
+      let selectedColor =
+        "linear-gradient(145deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.9))";
+
+      // Change reading status
+      function changeStatus(select, bookId) {
+        const container = document.querySelector(`[data-book-id="${bookId}"]`);
+        const badge = container.querySelector(".status-badge");
+        const value = select.value;
+
+        badge.className = "status-badge";
+
+        if (value === "read") {
+          badge.classList.add("status-read");
+          badge.textContent = "Read";
+        } else if (value === "reading") {
+          badge.classList.add("status-reading");
+          badge.textContent = "Reading";
+        } else {
+          badge.classList.add("status-to-read");
+          badge.textContent = "To Read";
+        }
+      }
+
+      // Open book modal
+      function openBook(bookId) {
+        const book = booksData[bookId];
+        if (!book) return;
+
+        document.getElementById("leftPageContent").innerHTML = book.leftContent;
+        document.getElementById("rightPageContent").innerHTML =
+          book.rightContent;
+        document.getElementById("bookModal").classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      // Close book modal
+      function closeBook() {
+        document.getElementById("bookModal").classList.remove("active");
+        document.body.style.overflow = "auto";
+      }
+
+      // Open add book modal
+      function openAddBookModal() {
+        document.getElementById("addBookModal").classList.add("active");
+        document.body.style.overflow = "hidden";
+      }
+
+      // Close add book modal
+      function closeAddBookModal() {
+        document.getElementById("addBookModal").classList.remove("active");
+        document.getElementById("newBookForm").reset();
+        document.body.style.overflow = "auto";
+
+        // Reset color selection
+        document.querySelectorAll(".color-option").forEach((opt) => {
+          opt.classList.remove("selected");
+        });
+        document.querySelector(".color-option").classList.add("selected");
+        selectedColor =
+          "linear-gradient(145deg, rgba(220, 38, 38, 0.9), rgba(153, 27, 27, 0.9))";
+      }
+
+      // Color picker functionality
+      document.querySelectorAll(".color-option").forEach((option) => {
+        option.addEventListener("click", function () {
+          document.querySelectorAll(".color-option").forEach((opt) => {
+            opt.classList.remove("selected");
+          });
+          this.classList.add("selected");
+          selectedColor = this.getAttribute("data-color");
+        });
+      });
+
+      // Add new book
+      function addNewBook(event) {
+        event.preventDefault();
+
+        const title = document.getElementById("bookTitle").value;
+        const author = document.getElementById("bookAuthor").value;
+        const coverUrl = document.getElementById("bookCoverUrl").value;
+        const icon = document.getElementById("bookIcon").value || "📖";
+        const status = document.getElementById("bookStatus").value;
+
+        const bookId = nextBookId++;
+
+        // Add to books data
+        booksData[bookId] = {
+          title: title,
+          author: author,
+          leftContent: `
+                    <h2>${title}</h2>
+                    <p><em>by ${author}</em></p>
+                    <h3>Welcome to Your Book</h3>
+                    <p>This is your custom book. You can imagine the wonderful stories and adventures contained within these pages.</p>
+                    <p>Every book is a journey, and this one is uniquely yours to explore.</p>
+                `,
+          rightContent: `
+                    <h3>Your Story Begins Here</h3>
+                    <p>The pages of this book are filled with endless possibilities.</p>
+                    <p>What adventures will unfold? What characters will you meet? What lessons will you learn?</p>
+                    <p>Only by reading can you discover the treasures hidden within.</p>
+                    <p>Happy reading!</p>
+                `,
+        };
+
+        // Create book element
+        const statusClass =
+          status === "read"
+            ? "status-read"
+            : status === "reading"
+            ? "status-reading"
+            : "status-to-read";
+        const statusText =
+          status === "read"
+            ? "Read"
+            : status === "reading"
+            ? "Reading"
+            : "To Read";
+
+        const bookHTML = `
+                <div class="book-container" data-book-id="${bookId}">
+                    <div class="status-badge ${statusClass}">${statusText}</div>
+                    <div class="book" onclick="openBook(${bookId})">
+                        <div class="book-spine"></div>
+                        <div class="book-cover" ${
+                          coverUrl
+                            ? `style="background-image: url('${coverUrl}')"`
+                            : ""
+                        }>
+                            <div class="book-overlay" style="background: ${selectedColor}">
+                                <div class="book-title">${title}</div>
+                                <div class="book-decoration">${icon}</div>
+                                <div class="book-author">by ${author}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="status-selector">
+                        <select onchange="changeStatus(this, ${bookId})" onclick="event.stopPropagation()">
+                            <option value="to-read" ${
+                              status === "to-read" ? "selected" : ""
+                            }>To Read</option>
+                            <option value="reading" ${
+                              status === "reading" ? "selected" : ""
+                            }>Reading</option>
+                            <option value="read" ${
+                              status === "read" ? "selected" : ""
+                            }>Read</option>
+                        </select>
+                    </div>
+                </div>
+            `;
+
+        document
+          .getElementById("bookshelf")
+          .insertAdjacentHTML("beforeend", bookHTML);
+        closeAddBookModal();
+      }
+
+      // Close modals on escape key
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          closeBook();
+          closeAddBookModal();
+        }
+      });
+
+      // Close modals on background click
+      document
+        .getElementById("bookModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeBook();
+          }
+        });
+
+      document
+        .getElementById("addBookModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeAddBookModal();
+          }
+        });
+
+      // Entrance animation
+      window.addEventListener("load", () => {
+        const books = document.querySelectorAll(".book-container");
+        books.forEach((book, index) => {
+          setTimeout(() => {
+            book.style.opacity = "0";
+            book.style.transform = "translateY(50px)";
+            book.style.transition = "opacity 0.6s ease, transform 0.6s ease";
+
+            setTimeout(() => {
+              book.style.opacity = "1";
+              book.style.transform = "translateY(0)";
+            }, 100);
+          }, index * 200);
+        });
+      });
+    </script>
+  </body>
+</html>
